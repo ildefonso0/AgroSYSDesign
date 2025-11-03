@@ -1,49 +1,90 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import type { WeatherData, CropRecommendation as CropRecommendationType } from "@shared/schema";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import LocationSearch from "@/components/LocationSearch";
 import WeatherDashboard from "@/components/WeatherDashboard";
 import CropRecommendation from "@/components/CropRecommendation";
 import MobilePhoneMockup from "@/components/MobilePhoneMockup";
+import { Card } from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Home() {
-  const [hasSearched, setHasSearched] = useState(false);
+  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+  const [cropData, setCropData] = useState<CropRecommendationType | null>(null);
+  const [lastCoordinates, setLastCoordinates] = useState<{ latitude: number; longitude: number } | null>(null);
+  const { toast } = useToast();
+  const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const weatherMutation = useMutation({
+    mutationFn: async (params: { latitude: number; longitude: number }) => {
+      const response = await apiRequest("POST", "/api/weather", params);
+      const data: WeatherData = await response.json();
+      return data;
+    },
+    onSuccess: (data) => {
+      setWeatherData(data);
+      cropMutation.mutate(data);
+    },
+    onError: (error) => {
+      toast({
+        title: "Erro ao obter dados meteorológicos",
+        description: error instanceof Error ? error.message : "Ocorreu um erro inesperado",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const cropMutation = useMutation({
+    mutationFn: async (weather: WeatherData) => {
+      const response = await apiRequest("POST", "/api/crop-recommendations", weather);
+      const data: CropRecommendationType = await response.json();
+      return data;
+    },
+    onSuccess: (data) => {
+      setCropData(data);
+    },
+    onError: (error) => {
+      toast({
+        title: "Erro ao gerar recomendações",
+        description: error instanceof Error ? error.message : "Ocorreu um erro inesperado",
+        variant: "destructive",
+      });
+    },
+  });
 
   const handleSearch = (location: string, lat?: number, lon?: number) => {
-    console.log("Searching for:", { location, lat, lon });
-    setHasSearched(true);
+    if (lat !== undefined && lon !== undefined) {
+      const coords = { latitude: lat, longitude: lon };
+      setLastCoordinates(coords);
+      weatherMutation.mutate(coords);
+    }
   };
 
-  const mockWeatherData = {
-    location: "Luanda, Angola",
-    temperature: 29,
-    humidity: 75,
-    windSpeed: 18,
-    precipitation: 2.5,
-    forecast: [
-      { day: "Seg", temp: 28, rain: 0 },
-      { day: "Ter", temp: 30, rain: 5 },
-      { day: "Qua", temp: 29, rain: 12 },
-      { day: "Qui", temp: 27, rain: 8 },
-      { day: "Sex", temp: 28, rain: 3 },
-      { day: "Sáb", temp: 31, rain: 0 },
-      { day: "Dom", temp: 30, rain: 2 },
-    ],
-  };
+  useEffect(() => {
+    if (lastCoordinates && weatherData) {
+      if (refreshIntervalRef.current) {
+        clearInterval(refreshIntervalRef.current);
+      }
 
-  const mockCropData = {
-    crops: [
-      { name: "Milho", icon: "corn" as const, suitability: "high" as const },
-      { name: "Feijão", icon: "wheat" as const, suitability: "high" as const },
-      {
-        name: "Mandioca",
-        icon: "carrot" as const,
-        suitability: "medium" as const,
-      },
-    ],
-    advice:
-      "Boa altura para o milho e feijão. As condições climáticas atuais favorecem o plantio destas culturas. A precipitação esperada nos próximos 7 dias é adequada para o desenvolvimento inicial.",
-  };
+      refreshIntervalRef.current = setInterval(() => {
+        console.log("Auto-refreshing weather data...");
+        weatherMutation.mutate(lastCoordinates);
+      }, 30 * 60 * 1000);
+
+      return () => {
+        if (refreshIntervalRef.current) {
+          clearInterval(refreshIntervalRef.current);
+        }
+      };
+    }
+  }, [lastCoordinates, weatherData]);
+
+  const isLoading = weatherMutation.isPending || cropMutation.isPending;
+  const hasSearched = weatherData !== null;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -101,19 +142,47 @@ export default function Home() {
                 </div>
               </div>
             </div>
+          ) : isLoading ? (
+            <div className="max-w-4xl mx-auto">
+              <LocationSearch onSearch={handleSearch} />
+              <Card className="p-12 mt-6">
+                <div className="flex flex-col items-center justify-center gap-4">
+                  <Loader2 className="w-12 h-12 animate-spin text-primary" />
+                  <p className="text-lg font-medium">
+                    {weatherMutation.isPending
+                      ? "A obter dados meteorológicos..."
+                      : "A gerar recomendações com IA..."}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Por favor, aguarde um momento
+                  </p>
+                </div>
+              </Card>
+            </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-6">
                 <LocationSearch onSearch={handleSearch} />
-                <WeatherDashboard data={mockWeatherData} />
-                <CropRecommendation {...mockCropData} />
+                <WeatherDashboard data={weatherData!} />
+                {cropData && <CropRecommendation {...cropData} />}
               </div>
 
               <div className="lg:col-span-1">
                 <MobilePhoneMockup
-                  temperature={mockWeatherData.temperature}
-                  condition="Céu limpo, sem chuva prevista"
-                  crops="Milho e feijão"
+                  temperature={weatherData!.temperature}
+                  condition={
+                    weatherData!.precipitation > 0
+                      ? `Chuva prevista: ${weatherData!.precipitation}mm`
+                      : "Céu limpo, sem chuva prevista"
+                  }
+                  crops={
+                    cropData
+                      ? cropData.crops
+                          .filter((c) => c.suitability === "high")
+                          .map((c) => c.name)
+                          .join(" e ") || "A analisar..."
+                      : "A analisar..."
+                  }
                 />
               </div>
             </div>
