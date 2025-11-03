@@ -1,0 +1,65 @@
+Perfeito, Joaquim 👌
+Vamos definir um guia de design e paleta de cores oficial para o AgroSYS / AgroSMS, de modo que o site transmita tecnologia, sustentabilidade e confiança, mas mantendo uma identidade visual angolana e agrícola.
+
+Aqui vai a proposta completa 👇
+
+🎨 Identidade Visual — AgroSYS
+🌿 1️⃣ Tema Geral
+
+Tecnologia verde ao serviço do agricultor.
+O design deve equilibrar o verde da agricultura com tons claros e limpos, que transmitam esperança, crescimento e modernidade.
+
+🟩 2️⃣ Paleta de Cores Oficial
+Função	Cor	Código	Significado
+Cor Primária (Verde Agrícola)	🟢 Verde-floresta	#2E7D32	Representa natureza, crescimento e confiança.
+Cor Secundária (Verde-Claro)	💚 Verde-claro	#81C784	Complementa a primária e dá leveza.
+Cor de Destaque (Amarela)	🌾 Amarelo-terra	#F9A825	Representa o sol, colheita e energia.
+Cor Neutra (Fundo Claro)	⚪ Cinza-esverdeado	#F5F7F4	Mantém a leitura suave e moderna.
+Cor de Texto Principal	⚫ Cinza-escuro	#333333	Alta legibilidade e contraste.
+Cor de Fundo Alternativo (Escuro)	🌑 Verde-musgo-escuro	#1B5E20	Usado no modo escuro.
+✨ 3️⃣ Tipografia (Fontes)
+
+Título e logótipo: Poppins Bold
+
+Moderna e clara, transmite inovação.
+
+Texto e corpo: Inter Regular
+
+Simples, legível e profissional.
+
+Números e dados (meteorologia): Orbitron ou Roboto Mono
+
+Dão um toque tecnológico e de precisão.
+
+📱 4️⃣ Layout e Estrutura Visual
+
+Divisão em 2 colunas principais:
+
+🧭 Painel esquerdo: mapa, dados climáticos e botões de localização.
+
+📱 Painel direito (mockup de telemóvel): resumo da previsão + recomendação agrícola.
+
+Cabeçalho fixo: logótipo AgroSYS + barra de pesquisa por cidade ou coordenadas.
+
+Rodapé discreto:
+© 2025 AgroSYS — Joaquim Ildefonso Mucuateno. Todos os direitos reservados.
+
+💡 5️⃣ Estilo geral
+
+Interface minimalista, com bastante espaço em branco.
+
+Ícones simples e lineares (usando Lucide Icons ou Feather Icons).
+
+Animações suaves com Framer Motion (ex: ao carregar dados).
+
+Botões arredondados (border-radius: 2xl) e sombras suaves (shadow-md) para dar profundidade.
+
+🌞 6️⃣ Exemplo de atmosfera visual
+
+Fundo verde-claro com cartões brancos para cada município.
+
+No painel direito (mockup de telemóvel), o fundo é branco com bordas arredondadas, e as mensagens aparecem como se fossem notificações:
+
+“☀️ Hoje: 29 °C, sem chuva. 🌾 Cultura ideal: feijão e mandioca.”
+
+Se quiseres, posso agora gerar o código-base do front-end (React + Tailwind) já com estas cores e estrutura — incluindo o mockup lateral de telemóvel e espaço para integração com as duas APIs (Open-Meteo e Gemine).

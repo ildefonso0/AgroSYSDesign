@@ -1,0 +1,79 @@
+Prompt para criação do site AgroSYS / AgroSMS
+
+💡 Objetivo:
+Criar um site moderno e responsivo chamado AgroSYS (ou AgroSMS), que mostre informações meteorológicas em tempo real de várias regiões de Angola (municípios, comunas, cidades, aldeias) com base em latitude e longitude, usando a API Open-Meteo.
+
+O sistema deve integrar-se também à API pública Gemine, que analisa os dados meteorológicos recebidos e devolve sugestões automáticas das melhores culturas para plantar naquela localização e período.
+
+O design deve incluir uma simulação de ecrã de telemóvel na lateral direita, representando como o agricultor veria as informações no seu telefone — apenas como exemplo visual (não precisa enviar mensagens reais).
+
+⚙️ Requisitos técnicos
+
+Usar React + TailwindCSS (ou Next.js com Tailwind) para o front-end.
+
+Criar uma interface limpa, verde e branca, inspirada em temas agrícolas.
+
+Adicionar um campo de pesquisa onde o utilizador pode procurar uma localidade ou inserir coordenadas (latitude e longitude).
+
+Usar a API Open-Meteo para obter:
+
+Temperatura atual
+
+Humidade
+
+Velocidade do vento
+
+Probabilidade de precipitação
+
+Precipitação acumulada dos próximos 7 dias
+
+Usar a tua API Gemine para processar esses dados e devolver:
+
+Lista das melhores culturas de plantio para aquele clima e época.
+
+Breve descrição de recomendação agrícola (“Boa altura para o milho”, “Evite batata-doce nesta semana”, etc.).
+
+Exibir os resultados no painel principal, e uma tela de telemóvel lateral (mockup) com resumo simplificado da previsão e recomendação.
+
+🎨 Design e Estrutura
+
+Cabeçalho com o logótipo AgroSYS e subtítulo: “Tecnologia para o agricultor angolano”.
+
+Secção central com:
+
+Mapa interativo (opcional, Leaflet ou Mapbox) ou apenas campos de coordenadas.
+
+Bloco principal com previsão meteorológica detalhada.
+
+Painel lateral (mockup de telemóvel) mostrando resumo curto:
+“☁️ Previsão: chuva leve | 🌾 Cultura ideal: milho e feijão.”
+
+Rodapé com:
+“© 2025 AgroSYS — Joaquim Ildefonso Mucuateno. Todos os direitos reservados.”
+
+🧩 Funcionalidades iniciais
+
+Atualização automática de dados a cada 30 minutos.
+
+Modo escuro e modo claro.
+
+Layout totalmente responsivo (desktop, tablet e telemóvel).
+
+Código preparado para expansão futura (ex: SMS, pagamentos, alertas climáticos).
+
+🧰 APIs a usar
+
+Open-Meteo API → https://open-meteo.com
+
+Exemplo de endpoint:
+https://api.open-meteo.com/v1/forecast?latitude=-12.77&longitude=15.73&daily=temperature_2m_max,precipitation_sum,wind_speed_10m_max&timezone=Africa/Luanda
+
+Gemine API pública (fornecida por Joaquim) → usada para processar os dados climáticos e devolver recomendações agrícolas.
+
+💬 Tom e propósito
+
+O site deve transmitir inovação, confiança e inclusão, mostrando que o AgroSYS é uma ponte entre tecnologia e o agricultor angolano.
+O foco é informar e capacitar os agricultores, mostrando que mesmo sem internet ou aplicações complexas, é possível ter acesso à meteorologia e recomendações agrícolas.
+
+🔚 Instrução final:
+Gera o código completo do site conforme descrito acima, incluindo a simulação da tela de telemóvel lateral, integração com as APIs e interface intuitiva pronta para demonstração.
