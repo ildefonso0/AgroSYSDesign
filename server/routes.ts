@@ -58,55 +58,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         throw new Error("GEMINI_API_KEY não configurado");
       }
 
-      const ai = new GoogleGenAI({ apiKey });
+      const genAI = new GoogleGenAI(apiKey);
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-      const prompt = `Você é um especialista agrícola em Angola. Analise os seguintes dados meteorológicos e forneça recomendações de culturas para plantar.
 
-Dados meteorológicos:
-- Temperatura atual: ${weatherData.temperature}°C
-- Humidade: ${weatherData.humidity}%
-- Velocidade do vento: ${weatherData.windSpeed} km/h
-- Precipitação atual: ${weatherData.precipitation} mm
-- Previsão 7 dias: ${weatherData.forecast.map(d => `${d.day}: ${d.temp}°C, ${d.rain}mm chuva`).join(", ")}
+      const prompt = `Você é um especialista agrícola em Angola. Analise os seguintes dados meteorológicos e forneça recomendações de culturas para plantar.\n\nDados meteorológicos:\n- Temperatura atual: ${weatherData.temperature}°C\n- Humidade: ${weatherData.humidity}%\n- Velocidade do vento: ${weatherData.windSpeed} km/h\n- Precipitação atual: ${weatherData.precipitation} mm\n- Previsão 7 dias: ${weatherData.forecast.map(d => `${d.day}: ${d.temp}°C, ${d.rain}mm chuva`).join(", ")}\n\nForneça uma resposta em JSON com o seguinte formato:\n{\n  "crops": [\n    {"name": "nome da cultura", "icon": "wheat|corn|carrot", "suitability": "high|medium|low"}\n  ],\n  "advice": "conselho em português para agricultores angolanos (2-3 frases)"\n}\n\nEscolha entre 3-5 culturas típicas de Angola (milho, feijão, mandioca, batata-doce, amendoim, etc.). Use "wheat" para culturas de grãos, "corn" para milho, e "carrot" para tubérculos.`;
 
-Forneça uma resposta em JSON com o seguinte formato:
-{
-  "crops": [
-    {"name": "nome da cultura", "icon": "wheat|corn|carrot", "suitability": "high|medium|low"}
-  ],
-  "advice": "conselho em português para agricultores angolanos (2-3 frases)"
-}
-
-Escolha entre 3-5 culturas típicas de Angola (milho, feijão, mandioca, batata-doce, amendoim, etc.). Use "wheat" para culturas de grãos, "corn" para milho, e "carrot" para tubérculos.`;
-
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: "object",
-            properties: {
-              crops: {
-                type: "array",
-                items: {
-                  type: "object",
-                  properties: {
-                    name: { type: "string" },
-                    icon: { type: "string", enum: ["wheat", "corn", "carrot"] },
-                    suitability: { type: "string", enum: ["high", "medium", "low"] },
-                  },
-                  required: ["name", "icon", "suitability"],
-                },
-              },
-              advice: { type: "string" },
-            },
-            required: ["crops", "advice"],
-          },
-        },
-        contents: prompt,
-      });
-
-      const text = response.text;
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
+      
       if (!text) {
         throw new Error("Gemini não retornou resposta");
       }

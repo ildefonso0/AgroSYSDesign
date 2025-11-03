@@ -21,6 +21,7 @@ export default function Home() {
   const [selectedCity, setSelectedCity] = useState<AngolaCity | null>(null);
   const [showDetailCard, setShowDetailCard] = useState(false);
   const [showLocationDialog, setShowLocationDialog] = useState(false);
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
   const [lastCoordinates, setLastCoordinates] = useState<{ latitude: number; longitude: number } | null>(null);
   const { toast } = useToast();
@@ -105,21 +106,26 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <Sidebar onSelectLocation={() => setShowLocationDialog(true)} />
+      <Sidebar
+        onSelectLocation={() => setShowLocationDialog(true)}
+        onShowForecast={() => setShowDetailCard(true)}
+        onShowSettings={() => setShowSettingsDialog(true)}
+      />
 
-      <main className="ml-20 min-h-screen pt-20 pb-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-8rem)] px-6">
-          <div className="lg:col-span-2 h-full relative">
-            <InteractiveMap
-              onCitySelect={handleCitySelect}
-              selectedCity={selectedCity}
-            />
-            <AnimatePresence>
-              {showWelcome && <WelcomeScreen />}
-            </AnimatePresence>
+      <main className="md:ml-20 min-h-screen pt-20 pb-28 md:pb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full px-4 md:px-6">
+          <div className="md:col-span-2 h-full relative">
+            {showWelcome ? (
+              <WelcomeScreen />
+            ) : (
+              <InteractiveMap
+                onCitySelect={handleCitySelect}
+                selectedCity={selectedCity}
+              />
+            )}
           </div>
 
-          <div className="lg:col-span-1 h-full">
+          <div className="hidden md:block md:col-span-1 h-full">
             <AnimatedMobilePreview
               weatherData={weatherData}
               cropData={cropData}
@@ -130,12 +136,16 @@ export default function Home() {
 
         <AnimatePresence>
           {showDetailCard && weatherData && (
-            <WeatherDetailCard
-              weatherData={weatherData}
-              cropData={cropData}
-              onClose={() => setShowDetailCard(false)}
-              isLoading={isLoading}
-            />
+            <Dialog open={showDetailCard} onOpenChange={setShowDetailCard}>
+              <DialogContent className="max-w-4xl">
+                <WeatherDetailCard
+                  weatherData={weatherData}
+                  cropData={cropData}
+                  onClose={() => setShowDetailCard(false)}
+                  isLoading={isLoading}
+                />
+              </DialogContent>
+            </Dialog>
           )}
         </AnimatePresence>
 
@@ -148,6 +158,20 @@ export default function Home() {
               </DialogDescription>
             </DialogHeader>
             <LocationSearch onSearch={handleSearch} />
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="font-heading text-2xl">Configurações</DialogTitle>
+              <DialogDescription>
+                Ajuste as configurações da aplicação.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <p>Aqui você poderá ajustar as configurações da aplicação.</p>
+            </div>
           </DialogContent>
         </Dialog>
       </main>
