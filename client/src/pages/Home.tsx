@@ -12,7 +12,9 @@ import WeatherDetailCard from "@/components/WeatherDetailCard";
 import AnimatedMobilePreview from "@/components/AnimatedMobilePreview";
 import LocationSearch from "@/components/LocationSearch";
 import WelcomeScreen from "@/components/WelcomeScreen";
+import ForecastPanel from "@/components/ForecastPanel";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Home() {
@@ -22,6 +24,7 @@ export default function Home() {
   const [showDetailCard, setShowDetailCard] = useState(false);
   const [showLocationDialog, setShowLocationDialog] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
+  const [activeTab, setActiveTab] = useState("map");
   const [lastCoordinates, setLastCoordinates] = useState<{ latitude: number; longitude: number } | null>(null);
   const { toast } = useToast();
   const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -105,27 +108,55 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <Sidebar onSelectLocation={() => setShowLocationDialog(true)} />
+      <Sidebar
+        onSelectLocation={() => setShowLocationDialog(true)}
+        onNavigate={setActiveTab}
+        activeTab={activeTab}
+      />
 
-      <main className="ml-20 min-h-screen pt-20 pb-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-8rem)] px-6">
-          <div className="lg:col-span-2 h-full relative">
-            <InteractiveMap
-              onCitySelect={handleCitySelect}
-              selectedCity={selectedCity}
-            />
-            <AnimatePresence>
-              {showWelcome && <WelcomeScreen />}
-            </AnimatePresence>
-          </div>
+      <main className="ml-16 md:ml-20 min-h-screen pt-20 pb-8">
+        <div className="container mx-auto px-4 lg:px-6">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="mb-6 grid w-full max-w-md mx-auto grid-cols-2">
+              <TabsTrigger value="map">Mapa</TabsTrigger>
+              <TabsTrigger value="forecast">Previsão</TabsTrigger>
+            </TabsList>
 
-          <div className="lg:col-span-1 h-full">
-            <AnimatedMobilePreview
-              weatherData={weatherData}
-              cropData={cropData}
-              locationName={selectedCity?.name}
-            />
-          </div>
+            <TabsContent value="map" className="mt-0">
+              <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                <div className="xl:col-span-2 w-full">
+                  <div className="relative h-[600px] lg:h-[700px] w-full">
+                    <InteractiveMap
+                      onCitySelect={handleCitySelect}
+                      selectedCity={selectedCity}
+                    />
+                    <AnimatePresence>
+                      {showWelcome && <WelcomeScreen />}
+                    </AnimatePresence>
+                  </div>
+                </div>
+
+                <div className="xl:col-span-1 w-full">
+                  <div className="sticky top-24 h-[600px] lg:h-[700px]">
+                    <AnimatedMobilePreview
+                      weatherData={weatherData}
+                      cropData={cropData}
+                      locationName={selectedCity?.name}
+                    />
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="forecast" className="mt-0">
+              <ForecastPanel
+                weatherData={weatherData}
+                cropData={cropData}
+                locationName={selectedCity?.name || "Selecione uma localização"}
+                isLoading={isLoading}
+              />
+            </TabsContent>
+          </Tabs>
         </div>
 
         <AnimatePresence>

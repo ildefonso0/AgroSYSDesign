@@ -3,6 +3,18 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { weatherRequestSchema, cropRecommendationSchema, type WeatherData, type CropRecommendation } from "@shared/schema";
 import { GoogleGenAI } from "@google/genai";
+import { readFileSync } from "fs";
+import { join } from "path";
+
+function getGeminiApiKey(): string {
+  try {
+    const configPath = join(process.cwd(), "config", "api-publica.json");
+    const configData = JSON.parse(readFileSync(configPath, "utf-8"));
+    return configData.gemini_api_key;
+  } catch (error) {
+    return process.env.GEMINI_API_KEY || "";
+  }
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/weather", async (req, res) => {
@@ -53,7 +65,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const weatherData = req.body as WeatherData;
 
-      const apiKey = process.env.GEMINI_API_KEY;
+      const apiKey = getGeminiApiKey();
       if (!apiKey) {
         throw new Error("GEMINI_API_KEY não configurado");
       }
